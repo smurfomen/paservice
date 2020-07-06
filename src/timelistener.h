@@ -21,6 +21,7 @@ protected:
     quint16 port{0};
 };
 
+
 #include <QUdpSocket>
 class MulticastTimeListener : public TimeListener
 {
@@ -37,6 +38,8 @@ private:
     QUdpSocket sock;
 };
 
+
+
 #include <memory>
 #include "clienttcp.h"
 class TcpTimeListener : public TimeListener
@@ -50,10 +53,9 @@ public:
 private Q_SLOTS:
     void connected(ClientTcp * );
     void disconnected(ClientTcp * );
-    void readyread(ClientTcp * );
+    void dataready(ClientTcp * );
 
 private:
-
     std::shared_ptr<ClientTcp> client;
 };
 

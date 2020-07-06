@@ -5,6 +5,7 @@
 
 #define dtmFmt "dd.MM.yyyy hh:mm:ss"
 
+
 bool ParseIpPort(QString ipport, QString &ip, quint16 &port)
 {
     bool ret = true;
@@ -32,7 +33,6 @@ bool ParseIpPort(QString ipport, QString &ip, quint16 &port)
     return ret;
 }
 
-
 TimeListener::TimeListener(QString ipport)
 {
     parsed = ParseIpPort(ipport,sAddr,port);
@@ -49,6 +49,9 @@ TimeListener *TimeListener::fromType(TimeListener::Type t, QString connection)
         throw std::logic_error("Неудовлетворительный тип соединения");
 }
 
+
+
+
 MulticastTimeListener::MulticastTimeListener(QString ipport)
     : TimeListener(ipport)
 {
@@ -58,6 +61,7 @@ MulticastTimeListener::MulticastTimeListener(QString ipport)
 MulticastTimeListener::~MulticastTimeListener()
 {
     sock.leaveMulticastGroup(QHostAddress(sAddr));
+    Logger::LogStr("Завершение работы MulticastTimeListener");
 }
 
 void MulticastTimeListener::startSinchronize()
@@ -92,17 +96,26 @@ void MulticastTimeListener::readDatagramm()
     time_t tm = QDateTime::fromString(sDateTime, dtmFmt).toTime_t();
 
     // меняем время
+    int diff = abs(time(NULL) - tm);
 #ifndef DEBUG
-    stime(&tm);
+    if(diff > 2)
+    {
+        stime(&tm);
 #else
     sDateTime = QDateTime::fromTime_t(tm).toString(dtmFmt);
 #endif
 
-    qDebug()<<datagram;
-    Logger::LogStr(QString("Произведена синхронизация по Multicast-соединению: %1 на время %2")
+    Logger::LogStr(QString("Пороизведена синхронизация по Multicast-соединению: %1 на время %2. Разбежка во времени с эталоном составляла %3сек.")
                    .arg(senderHost.toString() + ":" + QString::number(senderPort))
-                   .arg(sDateTime));
+                   .arg(sDateTime)
+                   .arg(diff));
+    }
 }
+
+
+
+
+
 
 
 
@@ -116,7 +129,9 @@ TcpTimeListener::TcpTimeListener(QString ipport)
 TcpTimeListener::~TcpTimeListener()
 {
     if(client)
-        client->disconnect();
+        client->stop();
+
+    Logger::LogStr("Завершение работы MulticastTimeListener");
 }
 
 void TcpTimeListener::startSinchronize()
@@ -127,9 +142,8 @@ void TcpTimeListener::startSinchronize()
     client = std::shared_ptr<ClientTcp>(new ClientTcp(sAddr, port));
     client->setAutoRecconect(true);
     QObject::connect(client.get(), SIGNAL(connected    (ClientTcp*)), this, SLOT(connected      (ClientTcp*)));
-    QObject::connect(client.get(), SIGNAL(dataready    (ClientTcp*)), this, SLOT(dataredy       (ClientTcp*)));
+    QObject::connect(client.get(), SIGNAL(dataready    (ClientTcp*)), this, SLOT(dataready       (ClientTcp*)));
     QObject::connect(client.get(), SIGNAL(disconnected (ClientTcp*)), this, SLOT(disconnected   (ClientTcp*)));
-    QObject::connect(client.get(), SIGNAL(error        (ClientTcp*)), this, SLOT(error          (ClientTcp*)));
     client->start();
 }
 
@@ -143,20 +157,25 @@ void TcpTimeListener::disconnected(ClientTcp * conn)
     Logger::LogStr(tr("TcpTimeListener: Отключен от %1").arg(conn->remoteIP()));
 }
 
-void TcpTimeListener::readyread(ClientTcp * conn)
+void TcpTimeListener::dataready(ClientTcp * conn)
 {
     QString sDateTime(conn->data());
     time_t tm = QDateTime::fromString(sDateTime, dtmFmt).toTime_t();
 
+    int diff = abs(time(NULL) - tm);
 #ifndef DEBUG
-    stime(&tm);
+    if(diff > 2)
+    {
+        stime(&tm);
 #else
     sDateTime = QDateTime::fromTime_t(tm).toString();
 #endif
 
-    Logger::LogStr(QString("Произведена синхронизация по Tcp-соединению: %1 на время %2")
+    Logger::LogStr(QString("Произведена синхронизация по Tcp-соединению: %1 на время %2. Разбежка во времени с эталоном составляла %3сек.")
                    .arg(conn->name())
-                   .arg(sDateTime));
+                   .arg(sDateTime)
+                   .arg(diff));
+    }
 }
 
 

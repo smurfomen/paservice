@@ -10,7 +10,7 @@ CONFIG -= app_bundle
 # depend on your compiler). Please consult the documentation of the
 # deprecated API in order to know how to port your code away from it.
 DEFINES += QT_DEPRECATED_WARNINGS
-DEFINES += DEBUG
+DEFINES -= DEBUG
 
 CONFIG(debug, debug|release){
 DESTDIR = $$PWD/build/timesyncd
@@ -25,7 +25,6 @@ DESTDIR = $$PWD/build/timesync
 
 SOURCES += \
         clienttcp.cpp \
-        ini.cpp \
         logger.cpp \
         main.cpp \
         servertcp.cpp \
@@ -39,7 +38,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     clienttcp.h \
-    ini.h \
     logger.h \
     servertcp.h \
     tcpheader.h \
