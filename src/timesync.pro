@@ -25,9 +25,12 @@ DESTDIR = $$PWD/build/timesync
 
 SOURCES += \
         clienttcp.cpp \
+        ini.cpp \
+        inireader.cpp \
         logger.cpp \
         main.cpp \
         servertcp.cpp \
+        singleapplication.cpp \
         tcpheader.cpp \
         timelistener.cpp
 
@@ -38,7 +41,10 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     clienttcp.h \
+    ini.h \
+    inireader.h \
     logger.h \
     servertcp.h \
+    singleapplication.h \
     tcpheader.h \
     timelistener.h
