@@ -2,17 +2,14 @@
 #define TIMELISTENER_H
 #include <QThread>
 #include <QHostAddress>
+#include <memory>
+
 class TimeListener: public QObject
 {
     Q_OBJECT
 public:
-    enum Type{
-        undef = 0,
-        Multicast = 1,
-        Tcp = 2,
-    };
     TimeListener(QString ipport);
-    static TimeListener * fromType(Type t, QString connection);
+    static std::shared_ptr<TimeListener> fromType(QString t, QString connection);
     virtual ~TimeListener() = default;
     virtual void startSinchronize() = 0;
 protected:
@@ -40,7 +37,6 @@ private:
 
 
 
-#include <memory>
 #include "clienttcp.h"
 class TcpTimeListener : public TimeListener
 {
