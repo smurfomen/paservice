@@ -7,7 +7,7 @@
 #include "timelistener.h"
 namespace ini {
 
-extern QVector<QSharedPointer<TimeListener>> listeners;
+extern QVector<std::shared_ptr<TimeListener>> listeners;
 void init(QStringList &params);
 }
 

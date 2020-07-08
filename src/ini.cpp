@@ -24,9 +24,9 @@ bool readIni(QString filename){
         IniReader rdr(filename);
         QString tmp;
         if(rdr.GetText("MULTICAST",tmp))
-            listeners.append(QSharedPointer<TimeListener>(new MulticastTimeListener(tmp)));
+            listeners.append(std::shared_ptr<TimeListener>(new MulticastTimeListener(tmp)));
         if(rdr.GetText("TCP", tmp))
-            listeners.append(QSharedPointer<TimeListener>(new TcpTimeListener(tmp)));
+            listeners.append(std::shared_ptr<TimeListener>(new TcpTimeListener(tmp)));
 
         if(rdr.GetText("LOGDIR", tmp))
             logger = std::shared_ptr<Logger>(new Logger(tmp, true, true));
@@ -46,9 +46,9 @@ bool readCmd(QStringList params){
             QString option = params.at(i);
             QString param = params.at(++i);
             if(option == "-multicast")
-                listeners.append(QSharedPointer<TimeListener>(new MulticastTimeListener(param)));
+                listeners.append(std::shared_ptr<TimeListener>(new MulticastTimeListener(param)));
             else if(option == "-tcp")
-                listeners.append(QSharedPointer<TimeListener>(new TcpTimeListener(param)));
+                listeners.append(std::shared_ptr<TimeListener>(new TcpTimeListener(param)));
         }
     }
 
@@ -60,10 +60,6 @@ bool readCmd(QStringList params){
 
 void init(QStringList &params)
 {
-//    for(auto p : params)
-//    {
-//        p = p.trimmed().replace('-',"").toLower();
-//    }
     QString inipath = "timesync.ini";
 
     for(int i = 0; i < params.size(); i++)
@@ -79,12 +75,12 @@ void init(QStringList &params)
     {
         if(!ini::readCmd(params))
         {
-            listeners.append(QSharedPointer<TimeListener>(new MulticastTimeListener("224.1.1.2:64465")));
+            listeners.append(std::shared_ptr<TimeListener>(new MulticastTimeListener("224.1.1.2:64465")));
         }
     }
 }
 
-QVector<QSharedPointer<TimeListener>> listeners;
+QVector<std::shared_ptr<TimeListener>> listeners;
 }
 
 
