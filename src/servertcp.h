@@ -20,36 +20,36 @@
     QObject::connect(server, SIGNAL(disconnected (ClientTcp*  )), this, SLOT(slotSvrDisconnected  (ClientTcp*)));
     QObject::connect(server, SIGNAL(roger        (ClientTcp*  )), this, SLOT(slotRoger            (ClientTcp*)));
     server->start();
-
- */
+*/
 #include <QTcpServer>
 #include <QTextCodec>
+#include "clienttcp.h"
 #include "logger.h"
-
+#include <memory>
 class ClientTcp;
 
 class ServerTcp: public QObject
 {
     Q_OBJECT
 public:
-    ServerTcp(quint16 port, QHostAddress bind=QHostAddress::Any, Logger * = nullptr); // конструктор получает порт и, возможно, интерфейс привязки
+    ServerTcp(quint16 port, QHostAddress bind=QHostAddress::Any, std::shared_ptr<Logger> logger = nullptr); // конструктор получает порт и, возможно, интерфейс привязки
     ~ServerTcp();
 
-    QList <class ClientTcp*> clients() { return _clients; }
+    QList <ClientTcp*> clients() { return _clients; }
     void sendToAll(char * data, quint16 length, bool rqAck=false);
     void packsendToAll(char * data, quint16 length, bool compress=false);
-    void sendToAllAck(int sec = 0);                                     // отправить всем квитанциию
-
-    bool start();
+    void sentoAllAck();                                     // отправить всем квитанциию
+    void start();
     void stop();
-    void reconfig(quint16 port, QHostAddress bind, Logger *logger);
+    void reconfig(quint16 port, QHostAddress bind=QHostAddress::Any, std::shared_ptr<Logger> = nullptr);
 signals:
-    void    clientIdent      (ClientTcp *, QString);
-    void	newConnection    (ClientTcp *);               // подключение нового клиента
-    void    dataready        (ClientTcp *);                // готовы форматные данные; необходимо их скопировать, т.к. они будут разрушены
-    void	acceptError      (ClientTcp *);                // ошибка на сокете
-    void    disconnected     (ClientTcp *);               // разрыв соединения
-    void    roger            (ClientTcp *);               // принята квитанция
+    void	newConnection(ClientTcp *);               // подключение нового клиента
+    void    dataready   (ClientTcp *);                // готовы форматные данные; необходимо их скопировать, т.к. они будут разрушены
+    void	acceptError (ClientTcp *);                // ошибка на сокете
+    void    disconnected (ClientTcp *);               // разрыв соединения
+    void    roger        (ClientTcp *);               // принята квитанция
+
+    void clientIdent    (ClientTcp*, QString);
 
 private slots:
     void	slotNewConnection();
@@ -60,14 +60,12 @@ private slots:
     void    slotRoger        (ClientTcp *);           // принята квитанция
 
 private:
-    QList <class ClientTcp*> _clients;
+    QList <ClientTcp*> _clients;
     QTcpServer *tcpServer;
     quint16 port;
     QHostAddress bind;
-    Logger      * logger;                                   // логгер для протоколирования
-    QString     msg;                                        // строка для формирования сообщений
-
-    void log (QString&);
+    std::shared_ptr<Logger> logger;                                   // логгер для протоколирования
+    QString msg;                                      // строка для формирования сообщений
 };
 
 #endif // SERVERTCP_H

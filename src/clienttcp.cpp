@@ -1,10 +1,10 @@
 #include <QTextCodec>
 #include "clienttcp.h"
-
-bool ClientTcp::debugMode = false;
+#include <QHostAddress>
+bool ClientTcp::debugMode = true;
 
 // конструктор, используемый сервером для создания экземпляра, обслуживающего подключение к серверу
-ClientTcp::ClientTcp(ServerTcp *server, QTcpSocket  *sock, Logger * logger)
+ClientTcp::ClientTcp(ServerTcp *server, QTcpSocket  *sock, std::shared_ptr<Logger> logger)
 {
     this->server = server;
     this->sock = sock;
@@ -20,12 +20,12 @@ ClientTcp::ClientTcp(ServerTcp *server, QTcpSocket  *sock, Logger * logger)
 }
 
 // конструктор клиентской стороны для подключения к серверу, заданному IP-адресом и портом
-ClientTcp::ClientTcp(QString& ip, int port, Logger * p, bool compress, QString idtype)
+ClientTcp::ClientTcp(QString& ip, int port, std::shared_ptr<Logger> logger, bool compress, QString idtype)
 {
     server = nullptr;
     this->remoteIp = ip;
     this->remotePort = port;
-    logger = p;
+    this->logger = logger;
     _compress = compress;
     _transparentMode = false;
 
@@ -38,11 +38,11 @@ ClientTcp::ClientTcp(QString& ip, int port, Logger * p, bool compress, QString i
 }
 
 // перегруженный конструктор клиентской стороны для подключения к серверу, заданному лексемой IP:ПОРТ
-ClientTcp::ClientTcp(QString& ipport, Logger * p, bool compress, QString idtype)
+ClientTcp::ClientTcp(QString& ipport, std::shared_ptr<Logger> logger, bool compress, QString idtype)
 {
     server = nullptr;
     TcpHeader::ParseIpPort(ipport, remoteIp, remotePort);
-    logger = p;
+    this->logger = logger;
     _compress = compress;
     _transparentMode = false;
 
@@ -113,8 +113,7 @@ void ClientTcp::setAutoRecconect(bool autoReconnect)
         {
             timerId = startTimer(1000);
         }
-    }
-    else
+    } else
     {
         if(timerId != -1)
         {
@@ -124,11 +123,6 @@ void ClientTcp::setAutoRecconect(bool autoReconnect)
     }
 }
 
-const QElapsedTimer& ClientTcp::getLastDataRead()
-{
-    return lastDataRead;
-}
-
 void ClientTcp::setDebugMode(bool debug)
 {
     debugMode = debug;
@@ -136,8 +130,8 @@ void ClientTcp::setDebugMode(bool debug)
 
 // прием данных
 // форматные данные:
-// - ushort -  сигнатуры: 0xAA55
-// - ushort -  длина пакета, включая заголовок
+// - WORD -  сигнатуры: 0xAA55
+// - WORD -  длина пакета, включая заголовок
 // - данные
 //
 // toRead - требуемая длина; если toRead==длине заголовка, принимаем заголовок, определяем длину пакета, и toRead = длине пакета
@@ -167,18 +161,22 @@ void ClientTcp::slotReadyRead()
                     toRead = sizeof(ExtendedTcpHeader);
                     _length += sock->read(_data +_length, toRead-_length);   // читаем в буфер со смещением length
                 }
-                else if (toRead==4)
+                else
                 {
-                    rcvd[0]++; rcvd[1] += toRead;           // инкремент
-                    //qDebug() << "Квитанция";
-                    acked = true;
-                    emit roger(this);                       // уведомляем о получении квитанции отпракой сигнала
+                    //qDebug() << "Заголовок";
+                    if (toRead==4)
+                    {
+                        rcvd[0]++; rcvd[1] += toRead;           // инкремент
+                        //qDebug() << "Квитанция";
+                        acked = true;
+                        emit roger(this);                       // уведомляем о получении квитанции отпракой сигнала
 
-                    // фикс 2018.06.06. Данные в потоке от рзаных отправок могут накладываться, поэтому
-                    // данные надо выбирать полностью! Выходить надо когда данных уже нет
-                    toRead = sizeof(TcpHeader);
-                    _length = 0;
-                    continue;                               //return;
+                        // фикс 2018.06.06. Данные в потоке от рзаных отправок могут накладываться, поэтому
+                        // данные надо выбирать полностью! Выходить надо когда данных уже нет
+                        toRead = sizeof(TcpHeader);
+                        _length = 0;
+                        continue;                               //return;
+                    }
                 }
             }
             else
@@ -380,7 +378,6 @@ void ClientTcp::send(void * p, int length)
         sock->write((char*)p,length);
         sent[0]++; sent[1] += length;
         acked = false;
-        lastDataSend = time(NULL);
     }
     else
         log(msg = tr("ClientTcp. Игнорируем отправку данных в разорванное соединение %1").arg(name()));

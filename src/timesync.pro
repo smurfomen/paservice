@@ -12,10 +12,10 @@ CONFIG -= app_bundle
 DEFINES += QT_DEPRECATED_WARNINGS
 
 CONFIG(debug, debug|release){
-DESTDIR = $$PWD/build/timesyncd
+DESTDIR = ../build/timesyncd
 DEFINES += DEBUG
 } else {
-DESTDIR = $$PWD/build/timesync
+DESTDIR = ../build/timesync
 }
 
 # You can also make your code fail to compile if it uses deprecated APIs.

@@ -1,12 +1,12 @@
-﻿#ifndef CLIENTTCP_H
+#ifndef CLIENTTCP_H
 #define CLIENTTCP_H
 
 #include "tcpheader.h"
-#include "servertcp.h"
+//#include "servertcp.h"
 #include "logger.h"
 #include <QElapsedTimer>
 #include <QTimer>
-
+#include <memory>
 
 // класс ClientTcp представляет собой обертку класса QTcpSocket, который участвует в TCP-соединении как на стороне клиента, так и на стороне сервера
 // функция isServer() возвращает истину для серверного соединения
@@ -33,16 +33,16 @@ signals:
     void roger       (ClientTcp *);                         // получена квитанция
 
 public:
-    ClientTcp(class ServerTcp *, QTcpSocket  *, Logger *);  // конструктор, используемый сервером
-    ClientTcp(QString& ipport, Logger * = nullptr, bool nodecompress=false, QString idtype = "");
-    ClientTcp(QString& remoteIp, int remotePort, Logger * = nullptr, bool compress=false, QString idtype = "");
+    ClientTcp(class ServerTcp *, QTcpSocket  *, std::shared_ptr<Logger> logger);  // конструктор, используемый сервером
+    ClientTcp(QString& ipport, std::shared_ptr<Logger> logger = nullptr, bool nodecompress=false, QString idtype = "");
+    ClientTcp(QString& remoteIp, int remotePort, std::shared_ptr<Logger> logger = nullptr, bool compress=false, QString idtype = "");
     ~ClientTcp() override;
 
     void start ();                                          // старт работы сокета
     void stop  ();                                          // останов сокета
     void bind (QString& remoteIp);
     //void compressMode(bool s);
-    void setlogger(Logger * p) { logger = p; }
+    void setlogger(std::shared_ptr<Logger> p) { logger = p; }
     void setid(QString id) { idtype = id; }
     QString getid() { return idtype; }
     bool isConnected() { return sock->state() == QAbstractSocket::ConnectedState; }
@@ -89,7 +89,6 @@ public:
     void resetStatistics (){ rcvd[0] = rcvd[1] = sent[0] = sent[1] = 0; }   // Сброс статистики полученных и отправленных данных
 
     void setAutoRecconect(bool autoReconnect);              // Включить или выключить автореконнект
-    const QElapsedTimer& getLastDataRead();
     static void setDebugMode(bool debug);
 
 private:
@@ -103,7 +102,7 @@ private:
     char        *_data;                                     // указатель на данные (выделяем new char[maxSizeExt];)
     bool        run;                                        // старт/стоп
     QString     msg;                                        // строка для формирования сообщений
-    Logger      *logger;                                    // логгер для протоколирования
+   std::shared_ptr<Logger> logger;                                    // логгер для протоколирования
 //  bool        nodecompress;                               // не распаковывать уже сжатые данные
     bool        _compress;                                  // не распаковывать уже сжатые данные
     bool        _transparentMode;                           // прием "как есть" без распаковки - используется в шлюзе СПД для ретрансляции
@@ -125,14 +124,8 @@ private:
     void init ();
     void log (QString&);
     void uncompress();                                      // если данные упакованы - распаковать
-
-
 protected:
     void timerEvent(QTimerEvent *event) override;           // Обрабатывает события таймера
-
-
-public:
-    time_t lastDataSend = 0;
 };
 
 #endif // CLIENTTCP_H
