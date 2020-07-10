@@ -47,18 +47,11 @@ void Logger::init(QString& filename)
     if (fi.isRelative())
     {
         // создаем папку лога
-        QString sdir = QString("%1/%2").arg(QDir::current().absolutePath()).arg(fi.path());
-        fi.dir().mkdir(sdir);
+        if(!fi.dir().exists())
+            fi.dir().mkpath(fi.absolutePath());
+        sFilePath = fi.absoluteFilePath();
+    }
 
-        // формируем полное имя файла
-        sFilePath = QString("%1/%2").arg(sdir).arg(fi.fileName());
-    }
-    else
-    {
-        // созданм папку по абсолютному пути
-        if (!fi.dir().exists())
-            QDir().mkdir(fi.dir().path());
-    }
     sFileNameWithoutExt = fi.baseName();
     sExt = fi.completeSuffix();
     dir  = fi.dir();
@@ -126,11 +119,17 @@ void Logger::LogStr (QString str)
 void Logger::LogTrace(QString prefix, void *p, int maxlength)
 {
     QString str = prefix + GetHex(p,maxlength);
-    if (trace_logger != nullptr)
-        trace_logger->log(str);
-    else
-        qDebug() << qPrintable(str);
+    Logger::LogTrace(str);
 }
+
+void Logger::LogTrace(QString s)
+{
+    if (trace_logger != nullptr)
+        trace_logger->log(s);
+    else
+        qDebug() << qPrintable(s);
+}
+
 
 // получить 16-ричную строку
 QString Logger::GetHex(void * data, int length)

@@ -23,6 +23,8 @@ public:
     static void SetTraceLogger(Logger * p) {trace_logger = p;}
     static void LogStr (QString str); // протоколирование строки в SQL и логе; если сохраняем в SQL, отображаем в строке сообщений
     static void LogTrace(QString prefix, void * p, int maxlength = 16);
+    static void LogTrace(QString s);
+
     static QString GetHex(void * data, int maxlength=16);
     static QString GetHex(QByteArray& array, int maxlength=16);
     static QString GetDirByName(QString);
@@ -41,9 +43,4 @@ private:
 
     void init(QString&);
 };
-
-namespace glb
-{
-    void Log (QString s);                                       // объявление для реализации лога в пространстве glb
-}
 #endif // LOGGER_H

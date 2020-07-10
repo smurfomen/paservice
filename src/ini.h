@@ -8,7 +8,7 @@
 namespace ini {
 
 extern QVector<std::shared_ptr<TimeListener>> listeners;
-void init(QStringList &params);
+void init(QString inipath);
 }
 
 #endif // INI_H

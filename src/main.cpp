@@ -18,13 +18,12 @@ int main(int argc, char *argv[])
     // 1. [-multicast, -tcp] - тип соединения
     // 2. [IP:PORT] - строка соединения
     // 3. /home/pcuser/dcbin/logdir/log.log - путь к логам
-    QStringList params;
-    for(int i = 1; i < argc; i++)
-    {
-        params<<argv[i];
-    }
 
-    ini::init(params);
+    QString inipath = "timesync.ini";
+    if(argc > 1)
+        inipath = argv[1];
+
+    ini::init(inipath);
 
     // работаем если единстенный
     if(a.isPrimary()) {
