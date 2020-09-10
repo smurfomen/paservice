@@ -2,12 +2,13 @@
 #include "inireader.h"
 
 std::shared_ptr<Logger> logger;                  // глобальный класс логгера
-QString LOG_DIR = "log/timesync.log";
+QString LOG_DIR = "log/paservice.log";
 namespace ini {
 
 QString zipDir;
 QString sourceDir;
 QString sourceFilePrefix = "@ras_";
+QVector<std::shared_ptr<TimeListener>> listeners;
 
 void init(QString inipath)
 {
@@ -45,7 +46,6 @@ void init(QString inipath)
         listeners.append(std::shared_ptr<TimeListener>(new MulticastTimeListener("224.1.1.2:64465")));
 }
 
-QVector<std::shared_ptr<TimeListener>> listeners;
 }
 
 

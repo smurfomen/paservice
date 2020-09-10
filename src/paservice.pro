@@ -15,7 +15,7 @@ CONFIG(debug, debug|release){
 DESTDIR = ../build/timesyncd
 DEFINES += DEBUG
 } else {
-DESTDIR = ../build/timesync
+DESTDIR = ../build/paservice
 }
 
 # You can also make your code fail to compile if it uses deprecated APIs.

@@ -17,7 +17,6 @@ public:
     void zip(const QList<QFileInfo> & tozip, QString zipname);
 
 private:
-
     ///\brief отдает файлы, которые нужно зипануть
     QList<QFileInfo> toNeedZip();
 
