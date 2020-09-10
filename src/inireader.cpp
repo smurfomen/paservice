@@ -1,8 +1,5 @@
 #include "inireader.h"
-#include <QRegularExpression>
-#include <QTextStream>
-#include <QFileInfo>
-#include <QDir>
+
 IniReader::IniReader(QString inifile)
 {
     this->inifile = inifile;
@@ -11,7 +8,7 @@ IniReader::IniReader(QString inifile)
 
 IniReader::~IniReader()
 {
-    //qDebug() << "~IniReader";
+
 }
 
 
@@ -19,7 +16,6 @@ IniReader::~IniReader()
 // ПРОБЛЕМА: порядок сортировки одноименных опций обратный: последняя опция будет первой
 bool IniReader::readIniFile (QString& _spath, bool bUnicode)
 {
-    //QString root = QDir::currentPath();
     bool ret = true;
 
     QString spath = _spath;

@@ -1,10 +1,13 @@
 #ifndef INIREADER_H
 #define INIREADER_H
 
-//#include "defines.h"
 #include <QString>
-#include <QMultiMap>
 #include <QFile>
+#include <QMap>
+#include <QDir>
+#include <QFileInfo>
+#include <QTextStream>
+#include <QRegularExpression>
 class IniReader
 {
 public:

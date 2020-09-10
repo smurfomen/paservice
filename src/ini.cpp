@@ -16,22 +16,26 @@ void init(QString inipath)
     {
         IniReader rdr(inipath);
         QString tmp;
+
+        // логирование
+        if(rdr.GetText("LOGDIR", tmp))
+            LOG_DIR = tmp;
+
+        // синхронизация
         if(rdr.GetText("MULTICAST",tmp))
             listeners.append(std::shared_ptr<TimeListener>(new MulticastTimeListener(tmp)));
 
         if(rdr.GetText("TCP", tmp))
             listeners.append(std::shared_ptr<TimeListener>(new TcpTimeListener(tmp)));
 
-        if(rdr.GetText("LOGDIR", tmp))
-            LOG_DIR = tmp;
-
-        if(rdr.GetText("ZIP_DIR", tmp))
+        // архив
+        if(rdr.GetText("ZIP", tmp))
             zipDir = tmp;
 
-        if(rdr.GetText("ARCHIVE_SOURCE_DIR", tmp))
+        if(rdr.GetText("SOURCE", tmp))
             sourceDir = tmp;
 
-        if(rdr.GetText("ARCHIVE_PREFIX", tmp))
+        if(rdr.GetText("PREFIX", tmp))
             sourceFilePrefix = tmp;
 
     }
