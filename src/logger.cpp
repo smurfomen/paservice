@@ -8,20 +8,15 @@
 
 #include "logger.h"
 
-Logger * Logger::logger;                                            // статический экземпляр логгера
-Logger * Logger::trace_logger;
+std::shared_ptr<Logger> Logger::logger = nullptr;                                            // статический экземпляр логгера
+std::shared_ptr<Logger> Logger::trace_logger = nullptr;
 
-Logger::Logger(QString filename,                                    // имя файла
-               bool tmdt       /*= true */,                         // пишем дату/время каждого сообщения
-               bool dayly      /*= false*/,                         // отдельный файл на каждый день в формате ИМЯ-ДД.*
-               bool truncate   /*= false*/)                         // удалить существующий файл, если он есть)
+Logger::Logger(QString filename, ulong flags)
 {
-    bLogTime  = tmdt;
-    bDayly    = dayly;
+    bLogTime    = (flags & WriteTime) > 0;
+    bDayly      = (flags & DaylyFiles) > 0;
+    truncate    = (flags & Truncate) > 0;
     locker    = new QMutex();
-    logger    = nullptr;
-    this->truncate  = truncate;
-
     init(filename);
 }
 
@@ -113,7 +108,7 @@ void Logger::LogStr (QString str)
     if (logger != nullptr)
         logger->log(str);
     else
-        qDebug() << qPrintable(str);
+        qDebug() << "ERR WRITE LOG:" <<  qPrintable(str);
 }
 
 void Logger::LogTrace(QString prefix, void *p, int maxlength)
@@ -122,12 +117,34 @@ void Logger::LogTrace(QString prefix, void *p, int maxlength)
     Logger::LogTrace(str);
 }
 
+void Logger::LogTrace(QString prefix, QByteArray data)
+{
+    Logger::LogTrace(prefix, data.data(), data.length());
+}
+
+
 void Logger::LogTrace(QString s)
 {
     if (trace_logger != nullptr)
         trace_logger->log(s);
     else
-        qDebug() << qPrintable(s);
+        qDebug() << "ERR WRITE LOG:" << qPrintable(s);
+}
+
+void Logger::LogToAll(QString s)
+{
+    Logger::LogStr(s);
+    Logger::LogTrace(s);
+}
+
+QString Logger::TraceFile()
+{
+    return trace_logger != nullptr? trace_logger->GetActualFile()  : "";
+}
+
+QString Logger::EventFile()
+{
+    return logger != nullptr? logger->GetActualFile()  : "";
 }
 
 

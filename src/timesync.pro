@@ -24,6 +24,7 @@ DESTDIR = ../build/timesync
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+        archivesaver.cpp \
         clienttcp.cpp \
         ini.cpp \
         inireader.cpp \
@@ -40,6 +41,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
+    archivesaver.h \
     clienttcp.h \
     ini.h \
     inireader.h \

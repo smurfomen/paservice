@@ -4,7 +4,8 @@
 #include "ini.h"
 
 #include <singleapplication.h>
-
+#include <QRegularExpression>
+#include "archivesaver.h"
 /* допустимая входная строка настроек:
  * -multicast [IP:PORT] - для Multicast-соединения
  * -tcp [IP:PORT]       - для TCP-соединения
@@ -25,8 +26,15 @@ int main(int argc, char *argv[])
 
     ini::init(inipath);
 
+
     // работаем если единстенный
     if(a.isPrimary()) {
+
+        if(!ini::sourceDir.isEmpty() && !ini::zipDir.isEmpty() && !ini::sourceFilePrefix.isEmpty())
+        {
+            ArchiveZipper zipper(ini::sourceDir, ini::zipDir, ini::sourceFilePrefix);
+        }
+
         for(auto tl : ini::listeners)
             tl->startSinchronize();
     }
