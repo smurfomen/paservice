@@ -12,7 +12,7 @@ CONFIG -= app_bundle
 DEFINES += QT_DEPRECATED_WARNINGS
 
 CONFIG(debug, debug|release){
-DESTDIR = ../build/timesyncd
+DESTDIR = ../build/paserviced
 DEFINES += DEBUG
 } else {
 DESTDIR = ../build/paservice
