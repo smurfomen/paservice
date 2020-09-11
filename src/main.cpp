@@ -11,7 +11,12 @@
  */
 int main(int argc, char *argv[])
 {
-    SingleApplication a(argc, argv);
+    SingleApplication a(argc, argv, true);
+
+    // работаем если единстенный
+    if(a.isSecondary()) {
+        throw std::logic_error("Приложение уже запущено");
+    }
 
     // если переданы аргументы - используем их
     // порядок аргументов:
@@ -25,15 +30,10 @@ int main(int argc, char *argv[])
 
     ini::init(inipath);
 
-    // работаем если единстенный
-    if(a.isPrimary()) {
+    ArchiveZipper zipper(ini::sourceDir, ini::zipDir, ini::sourceFilePrefix);
 
-        if(!ini::sourceDir.isEmpty() && !ini::zipDir.isEmpty() && !ini::sourceFilePrefix.isEmpty())
-            ArchiveZipper zipper(ini::sourceDir, ini::zipDir, ini::sourceFilePrefix);
-
-        for(auto tl : ini::listeners)
-            tl->startSinchronize();
-    }
+    for(auto tl : ini::listeners)
+        tl->startSinchronize();
 
     return a.exec();
 }

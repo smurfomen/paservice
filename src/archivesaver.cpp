@@ -1,10 +1,9 @@
 #include "archivesaver.h"
-#include <QDebug>
 #include <QDateTime>
 #include <QTime>
 #include <QProcess>
 
-ArchiveZipper::ArchiveZipper(QString src_directory, QString zip_directory, QString filePrefix)
+ArchiveZipper::ArchiveZipper(QString src_directory, QString zip_directory, QString filePrefix) : QObject()
 {
     source.setPath(src_directory);
     zipdir.setPath(zip_directory);
@@ -68,9 +67,10 @@ void ArchiveZipper::update()
 
     if(list.size())
     {
+        // вычислить имя архива
         QDate dt = QDateTime::currentDateTime().date();
 
-        // если полночь - архивируем с именем уже вчерашней даты
+        // если новый день - архивируем с именем вчерашней даты
         if(QTime::currentTime().hour() == 0)
             dt.setDate(dt.year(), dt.day() == 0 ? dt.month()-1 : dt.month(), dt.day()-1);
 
@@ -95,7 +95,6 @@ bool ArchiveZipper::filtrate(QString filename)
     return true;
 }
 
-
 void ArchiveZipper::timerEvent(QTimerEvent *event)
 {
     Q_UNUSED(event)
@@ -109,7 +108,7 @@ void ArchiveZipper::zip(const QList<QFileInfo> & files, QString zipname){
 
     // формируем имя архива
     if(fizip.suffix() == "")
-        zipname = QString("%1").arg(zipname);
+        zipname = QString("%1.zip").arg(zipname);
 
     if(!fizip.isAbsolute())
         zipname = QString("%1/%2").arg(zipdir.absolutePath()).arg(zipname);

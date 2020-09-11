@@ -3,7 +3,7 @@
 
 #include <QDir>
 #include <QRegularExpression>
-#include "option.h"
+#include <QObject>
 
 class ArchiveZipper : public QObject
 {
@@ -16,22 +16,24 @@ public:
     ///\brief выполняет зип архивирование переданных файлов в архив с переданным именем.
     void zip(const QList<QFileInfo> & tozip, QString zipname);
 
-private:
-    ///\brief отдает файлы, которые нужно зипануть
-    QList<QFileInfo> toNeedZip();
-
+public slots:
     ///\brief попытаться зипануть доступные за последние сутки файлы.
     ///\details например: в 13.00 зипанет все файлы от 00.00 до 12.00, у которых последнее изменение было в течение последних 24 часов.
     void update();
 
+private:
+    void timerEvent(QTimerEvent *event);
+
+    ///\brief отдает файлы, которые нужно зипануть
+    QList<QFileInfo> toNeedZip();
+
+
+    ///\brief Возвращает true если имя соответствует маске и проходит активные фильтры
     bool filtrate(QString filename);
 
-    ///\brief вызывает update
-    void timerEvent(QTimerEvent *event) override;
-
     ///\brief добавить фильтр
-    ///\details например regexp == "^(%1)(?<hour>\\d+).(?<ext>\\w+)$"), отфильтровать можно по hour или по ext
-    ///\details добавляем фильтр ext на txt и получим только txt файлы
+    ///\details например regexp == "^(my_file)(?<hour>\\d+).(?<ext>\\w+)$"), отфильтровать можно по hour или по ext
+    ///\details добавляем фильтр ext на txt и получим только txt файлы с именем my_file
     void addFilter(const QString & name, const QString & filter);
 
     ///\brief удалить фильтр
