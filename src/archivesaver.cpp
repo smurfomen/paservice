@@ -3,7 +3,7 @@
 #include <QTime>
 #include <QProcess>
 
-ArchiveZipper::ArchiveZipper(QString src_directory, QString zip_directory, QString filePrefix) : QObject()
+ArchiveZipper::ArchiveZipper(QString src_directory, QString zip_directory, QString filePrefix)
 {
     source.setPath(src_directory);
     zipdir.setPath(zip_directory);
@@ -47,7 +47,7 @@ QList<QFileInfo> ArchiveZipper::toNeedZip()
             QString h = match.captured("hour");
             quint8 fileHour = h.toUInt();
             if(     !h.isEmpty()                                                                        // 1. разматчили
-                    && fileHour <= hour                                                                 // 2. час файла меньше или равен максимально допустимому
+                    && fileHour >= 0 && fileHour <= hour                                                // 2. значение часа находится в пределах от 0 до максимально допустимого
                     && fileHour != QTime::currentTime().hour()                                          // 3. час файла не равен актуальному
                     && f.lastModified().toTime_t() > QDateTime::currentDateTime().toTime_t() - 24*3600  // 4. последний раз был модифицирован не более суток назад
               )

@@ -27,7 +27,7 @@ SOURCES += \
         archivesaver.cpp \
         clienttcp.cpp \
         ini.cpp \
-        inireader.cpp \
+        inireadwrite.cpp \
         logger.cpp \
         main.cpp \
         servertcp.cpp \
@@ -44,7 +44,7 @@ HEADERS += \
     archivesaver.h \
     clienttcp.h \
     ini.h \
-    inireader.h \
+    inireadwrite.h \
     logger.h \
     servertcp.h \
     singleapplication.h \
